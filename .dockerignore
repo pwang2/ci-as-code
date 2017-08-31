@@ -1,0 +1,9 @@
+.git
+build/
+config/
+portability/
+reports/
+src/
+static/
+test/
+node_modules/

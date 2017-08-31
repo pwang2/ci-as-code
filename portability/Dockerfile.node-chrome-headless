@@ -1,0 +1,42 @@
+FROM node:6.11.2-stretch
+
+ENV CHROMEDRIVER_FILEPATH        /usr/share/chromedriver_linux64.zip
+ENV CHROME_BIN                   /usr/bin/google-chrome
+ENV NPM_CONFIG_LOGLEVEL          warn
+ENV JAVA_VERSION                 8u141
+ENV JAVA_DEBIAN_VERSION          8u141-b15-1~deb9u1
+ENV CA_CERTIFICATES_JAVA_VERSION 20170531+nmu1
+
+RUN set -ex; \
+    # deal with slim variants not having man page directories (which causes "update-alternatives" to fail)
+    if [ ! -d /usr/share/man/man1 ]; then \
+      mkdir -p /usr/share/man/man1; \
+    fi; \
+
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+      apt-transport-https  \
+      ca-certificates \
+	  	ca-certificates-java="$CA_CERTIFICATES_JAVA_VERSION" \
+      gnupg2 \
+      openjdk-8-jre-headless="$JAVA_DEBIAN_VERSION" && \
+
+    update-ca-certificates && \
+
+    curl -sSL https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
+    echo "deb https://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list && \
+
+    curl -sSL https://chromedriver.storage.googleapis.com/2.31/chromedriver_linux64.zip  -o ${CHROMEDRIVER_FILEPATH} && \
+
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+      google-chrome-stable && \
+
+    apt-get clean -qqy && \
+    rm -rf /tmp/* /root/.npm /var/lib/apt/lists/* /var/cache/apt/* && \
+
+    mkdir -p "~/.config" && \
+
+    echo "$(npm version)" && echo "$(google-chrome --version)" && echo "$(java -version)"
+
+VOLUME ["/var/run/docker.sock"]

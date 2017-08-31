@@ -1,0 +1,8 @@
+FROM sonarqube:lts-alpine
+
+ENV PLUGIN_DOWNLOAD_LOCATION /opt/plugins-download
+
+RUN rm -rf /opt/sonarqube/extensions/plugins/*.jar && \
+    cd  /opt/sonarqube/extensions/plugins/ && \
+    wget https://sonarsource.bintray.com/Distribution/sonar-javascript-plugin/sonar-javascript-plugin-3.1.1.5128.jar
+

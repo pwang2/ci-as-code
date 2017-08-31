@@ -1,0 +1,43 @@
+version: '3'
+services:
+  sonarqube:
+    build:
+      context: .
+      dockerfile: Dockerfile.sonarqube-with-sonarjs
+    ports:
+      - 9000:9000
+      - 9092:9092
+    volumes:
+      - ".sonarqube/data:/opt/sonarqube/data"
+    restart: always
+
+  local-registry:
+    image: registry:2
+    ports:
+      - 5000:5000
+    restart: always
+
+  registry-web:
+    image: hyper/docker-registry-web
+    ports:
+      - 55000:8080
+    environment:
+      - REGISTRY_URL=http://local-registry:5000/v2
+      - REGISTRY_NAME=localhost:5000
+
+  docker-jenkins:
+    build:
+      context: .
+      dockerfile: Dockerfile.jenkins-with-docker
+    ports:
+      - 9999:8080
+      - 20000:50000
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - ".jenkins_home:/var/jenkins_home"
+      - "..:/var/ruleit"
+      - "$HOME/npm-packages-offline-cache:/root/npm-packages-offline-cache"
+      - "$HOME/.ssh:/root/.ssh"
+      - "$HOME/Library/Caches/Yarn/v1:/usr/local/share/.cache/yarn/v1"
+    restart: always
+

@@ -1,0 +1,17 @@
+FROM jenkins/jenkins:lts-alpine
+USER root
+WORKDIR /var/jenkins_home
+
+COPY ./jenkins-plugin-list.txt plugins.txt
+
+RUN curl -fsSLO https://get.docker.com/builds/Linux/x86_64/docker-17.04.0-ce.tgz \
+  && tar xzvf docker-17.04.0-ce.tgz \
+  && mv docker/docker /usr/local/bin \
+  && rm -r docker docker-17.04.0-ce.tgz
+
+RUN /usr/local/bin/install-plugins.sh < /var/jenkins_home/plugins.txt
+
+ENV JAVA_OPTS "-Djenkins.install.runSetupWizard=false"
+
+VOLUME ["/var/run/docker.sock","/root/.ssh","/var/integrity2-ui"]
+
